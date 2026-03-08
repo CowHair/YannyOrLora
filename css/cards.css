@@ -1,0 +1,187 @@
+html, body {
+    background-color: #05172e !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.card-block {
+    background-color: #05172e !important;
+    background-image: none !important;
+    -webkit-background-image: none !important;
+}
+
+.card-title {
+    color: #fff !important;
+}
+
+.card-group {
+    background-color: #05172e !important;
+}
+.main-cont{
+    background-color: #05172e;
+    padding: 0;
+    margin: 0;
+    top: 0;
+}
+
+.news-row {
+	margin: 0;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    background-color: #05172e !important;
+    border-image: none !important;
+}
+
+.news-block{
+    margin: auto;
+    padding: 0;
+    background-color: transparent;
+    max-width: 1060px;
+    min-width: 100px;
+    border: 20px solid transparent;
+    background-color: #05172e !important;
+    border-image: none !important;
+    -webkit-transition: all 0.6s ease;
+    transition: all 0.6s ease;
+    -webkit-animation: blockAppear .6s ease-in-out;
+            animation: blockAppear .6s ease-in-out;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+}
+
+.underlay{
+  /*display: none;*/
+  margin: 0;
+  padding: 0;
+  max-height: 350px;
+  max-width: 340px;
+}
+
+.card {
+    margin: 0;
+    width: 340px;
+    max-height: 350px;
+    max-width: 340px;
+    background-color: #05172e !important;
+    border: none !important;
+    border-image: none !important;
+    border-image-slice: unset !important;
+    -webkit-transition: -webkit-transform 0.6s ease;
+    transition: transform 0.6s ease;
+    -webkit-animation: blockAppear .6s ease-in-out;
+            animation: blockAppear .6s ease-in-out;
+    -webkit-animation-duration: 1.5s;
+            animation-duration: 1.5s;
+}
+@-webkit-keyframes blockAppear {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(20px) ;
+            transform: translateY(20px) ;
+  }
+}
+
+
+.card:hover{
+    z-index: 999;
+    max-height: 800px;
+    width: 400px;
+    max-width: 400px;
+    border: none !important;
+    border-right: 60px solid transparent !important;
+    border-bottom: 20px solid transparent !important;
+    margin-right: -20px;
+	  -webkit-transform:  translate(-30px, -50px);
+	          transform:  translate(-30px, -50px);
+}
+
+.card:before{
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  display: block;
+  content: '';
+  position: absolute;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  -webkit-transition: -webkit-box-shadow 0.6s ease;
+  transition: -webkit-box-shadow 0.6s ease;
+  transition: box-shadow 0.6s ease;
+  transition: box-shadow 0.6s ease, -webkit-box-shadow 0.6s ease;
+}
+
+.card:hover:before
+{
+  max-width: 300px;
+  -webkit-box-shadow: 60px 60px 20px RGBA(142, 142, 142, .6);
+          box-shadow: 60px 60px 20px RGBA(142, 142, 142, .6);
+}
+
+.card:hover .card-img-top{
+	height: 300px;
+}
+
+.card:hover .card-block {
+  width: 300px;
+	background-image: -webkit-gradient(linear,right bottom, left top,from(rgb(72, 85, 108)),color-stop(50%, rgb(27, 33, 43)),color-stop(51%, rgb(20, 25, 34)),to(rgb(53, 59, 69)));
+	background-image: linear-gradient(to top left,rgb(72, 85, 108) 0%,rgb(27, 33, 43) 50%,rgb(20, 25, 34) 51%,rgb(53, 59, 69) 100%);
+}
+
+.card:hover .card-title{
+    color: white;
+}
+
+.card:hover .card-text{
+	  /*display: block !important;*/
+    color: white;
+}
+
+.card-text {
+	display: none;
+}
+
+.card-img-top{
+    width: 100%;
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    -webkit-transition: height 0.8s ease;
+    transition: height 0.8s ease;
+}
+
+@media (max-width: 1120px){
+    .news-block{
+       max-width: 720px;
+    }
+    .card:hover{
+      margin-right: -20px;
+    }
+    .card:hover .card-block{
+      width: 300px;
+    }
+}
+
+@media (max-width: 800px){
+    .news-block{
+       min-width: 380px;
+    }
+    .card:hover{
+      border-left: 20px solid transparent !important;
+      margin-right: -40px;
+      -webkit-transform:  translate(0, -50px);
+              transform:  translate(0, -50px);
+    }
+    .card:hover:before{
+      -webkit-box-shadow: 0px 60px 40px RGBA(142, 142, 142, .5);
+              box-shadow: 0px 60px 40px RGBA(142, 142, 142, .5);
+    }
+    .card:hover .card-block{
+      width: 300px;
+    }
+}
+
+@media (max-width: 580px){
+  .news-block{
+     max-width: 380px;
+  }
+}
