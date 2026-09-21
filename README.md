@@ -1,11 +1,13 @@
 # CanSat Competition 2026 Team YannyOrLora | 1st in Canada and represented Canada in Eurpean Space Agency
 
+![Alt Text](media/TeamMainPhoto.jpg)
+
 ## Team Members
 
-- [Matthew Song] - Co Captain
+- [Matthew Song](#) - Co Captain
     - Paracute Design
     - Developing and testing landing gears
-- [Asa Liu] - Co Captain
+- [Asa Liu](#) - Co Captain
     - Frame Design
     - Mechanical Design
     - Electrical Design
@@ -43,7 +45,7 @@ The project is split into the following directories:
 
 The CanSat is launched to around 1km altitude and descends under parachute, while continuously transmitting telemetry including: (temperature, humidity, pressure, altitude, GPS position) to the ground station once per second. Independently, a wearable SOS device carried to simulate a hiker in emerency situation broadcasts a SOS packet with (heart rate, GPS position, local temperature/humidity) whenever button on the device is triggered.
 
-The CanSat acts as the relay between the two: it listens for the SOS device's signal, caches the most recent emerency data it hears, and piggybacks those fields onto its normal telemetry stream to the ground. The ground station sees both the CanSat's own descent data and the hiker's status in a single feed, without needing separate ground hardware for each link.
+The CanSat acts as the relay between the emerency device and ground station. It listens for the SOS device's signal, caches the most recent emerency data it hears, and piggybacks those fields onto its normal telemetry stream to the ground. The ground station sees both the CanSat's own descent data and the hiker's status in a single feed, without needing separate ground hardware for each link.
 
 ## Radio System (Time Sliced Relay Architecture)
 
@@ -56,3 +58,10 @@ The onboard radio logic (LoRa, via RadioLib) runs on a strict 1 second frame, sp
 | Pad | remainder | GPS and LED housekeeping, holding the frame to exactly 1 second |
 
 Two separate LoRa sync words keep the two links from colliding on the same channel: one for the CanSat↔SOS-device link, one for the CanSat→ground link. Cached SOS data expires automatically if no new packet arrives within 10 seconds, so the ground station is never shown stale distress information. ACKs to the SOS device are rate-limited so the CanSat doesn't spend its listen/transmit budget re-acknowledging every frame once contact is established.
+
+## Hardware
+
+## Firmware
+
+## Software
+
