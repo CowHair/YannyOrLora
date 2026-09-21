@@ -62,8 +62,8 @@ Two separate LoRa sync words keep the two links from colliding on the same chann
 ## Hardware/Mechanical Design
 <table>
     <tr>
-        <td><img src="media/Radio_main" width="500"></td>
-        <td><img src="media/Radio_CanSat.png" width="500"></td>
+        <td><img src="media/Radio_main.jpg" width="500"></td>
+        <td><img src="media/Radio_CanSat.jpg" width="500"></td>
     </tr>
 </table>
 
