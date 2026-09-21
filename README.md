@@ -1,35 +1,35 @@
-# CanSat Competition 2026 Team YannyOrLora | 1st in Canada and represented Canada in Eurpean Space Agency
+# CanSat Competition 2026 Team Yanny or LoRa | 1st in Canada 🇨🇦 and represented Canada at the European Space Agency
 
 ![Alt Text](media/TeamMainPhoto.jpg)
 
 ## Team Members
 
-- [Matthew Song](#) - Co Captain
+- [Matthew Song](#) - Co-Captain
     - Paracute Design
-    - Developing and testing landing gears
-- [Asa Liu](#) - Co Captain
+    - Developing and Testing Landing Gear
+- [Asa Liu](#) - Co-Captain
     - Frame Design
     - Mechanical Design
     - Electrical Design
-- [Zoey Cheang](https://www.linkedin.com/in/zoey-cheang-855535368/) - Firmware lead
+- [Zoey Cheang](https://www.linkedin.com/in/zoey-cheang-855535368/) - Firmware Lead
     - Website Development
     - CanSat Firmware
     - Radio Communication
 - [Naiming Zheng](https://www.linkedin.com/in/naiming-z-1a4383371/) - Software Lead
     - Ground Station Software
-    - Three-Ways-Communication Development
+    - Three-Way Communication Development
 - [Bogdan Shkromiuk](https://www.linkedin.com/in/bogdan-shkromiuk-215a08417/) - Hardware Lead
     - Hardware Design
-    - CanSat and Radio Device Asesembly
+    - CanSat and Radio Device Assembly
     - Frame Design
-- [Dora Yuen](https://www.linkedin.com/in/dora-yuan-2a594b307/) - Outreach Lead
-    - Organise Outreach Event
-    - Design Landing Gear
-    - Report Main Author
+- [Dora Yuan](https://www.linkedin.com/in/dora-yuan-2a594b307/) - Outreach Lead
+    - Organizing Outreach Events
+    - Designing Landing Gear
+    - CanSat Report Main Author
 
 ## Project Abstract
 
-CanSat competition challenges teams to design and build a soda-can-sized satellite, launch it to around 1km altitude, and safely recover telemetry every seconds as it descends. Our mission extends the standard telemetry, allowing the CanSat also acts as a relay for a wearable hiker SOS device, listening for signals on a separate radio channel and forwarding the hiker's vitals, GPS position, and environmental readings back to the ground station alongside the CanSat's own sensor data, while acknowledging receipt back to the hiker device so it knows help is aware of its location.
+The CanSat competition challenges teams to design and build a soda-can-sized satellite, launch it to around 1km altitude, and safely recover telemetry every seconds as it descends. Our mission extends the standard telemetry, allowing the CanSat also acts as a relay for a wearable hiker SOS device, listening for signals on a separate radio channel and forwarding the hiker's vitals, GPS position, and environmental readings back to the ground station alongside the CanSat's own sensor data, while acknowledging receipt back to the hiker device so it knows help is aware of its location.
 
 ## This Repository
 
