@@ -62,13 +62,14 @@ Two separate LoRa sync words keep the two links from colliding on the same chann
 ## Hardware/Mechanical Design
 <table>
     <tr>
-        <td><img src="media/Body.png" width="300"></td>
-        <td><img src="media/Body_2.png" width="300"></td>
-        <td><img src="media/TopLid.png" width="300"></td>
-        <td><img src="media/BottomLid.png" width="300"></td>
+        <td><img src="media/Radio_main" width="500"></td>
+        <td><img src="media/Radio_CanSat.png" width="500"></td>
     </tr>
 </table>
 
+- Include 
+- Designed in FreeCad and 3D printed
+- 
 ## Firmware
 
 ## Software
