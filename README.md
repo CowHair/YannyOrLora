@@ -1,4 +1,5 @@
-# CanSat Competition 2026 Team Yanny or LoRa | 1st in Canada 🇨🇦 and represented Canada at the European Space Agency
+# CanSat Competition 2026 Team Yanny or LoRa 🏆 | 1st in Canada 🇨🇦 and represented Canada at the European Space Agency
+*From Eric Hamber Secondary School in Vancouver, BC, Canada*
 
 ![Alt Text](media/TeamMainPhoto.jpg)
 
