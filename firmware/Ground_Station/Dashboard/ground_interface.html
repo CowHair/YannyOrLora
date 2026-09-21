@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Yanny or Lora Ground Station</title>
+<!-- OFFLINE MODE: Make sure you have downloaded chart.js to the same folder as this file -->
+<script src="chart.js"></script>
+<style>
+/* ── VARIABLES (Standard Desktop App Look) ─────────────────────── */
+:root {
+  --bg:           #121212;
+  --surface:      #1e1e1e;
+  --surface2:     #252526;
+  --border:       #3e3e42;
+  --border-hi:    #555555;
+  --text:         #cccccc;
+  --text-bright:  #ffffff;
+  --muted:        #858585;
+  --accent:       #007acc; 
+  --danger:       #d13438; 
+  --warn:         #d7ba7d;
+  /* System built-in fonts only - NO WIFI NEEDED */
+  --mono:         Consolas, "Courier New", monospace;
+  --sans:         "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ── RESET ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 12px; overflow: hidden; }
+
+/* Global SOS Flash Animation - PURE RED */
+@keyframes global-sos-glow {
+  0%   { box-shadow: inset 0 0 0px rgba(255, 0, 0, 0); }
+  50%  { box-shadow: inset 0 0 150px rgba(255, 0, 0, 1), inset 0 0 50px rgba(255, 0, 0, 0.8); }
+  100% { box-shadow: inset 0 0 0px rgba(255, 0, 0, 0); }
+}
+body.sos-active {
+  animation: global-sos-glow 1.2s infinite;
+}
+
+/* ── APP SHELL ──────────────────────────────────────────────────── */
+#app {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-columns: 1fr 1fr 320px;
+  grid-template-rows: 50px 1fr 1fr auto 24px;
+  gap: 6px;
+  padding: 6px;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+#header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.hdr-brand {
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hdr-brand .title { font-size: 16px; font-weight: bold; color: var(--text-bright); }
+.hdr-brand .subtitle { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+
+.hdr-stats { display: flex; align-items: stretch; flex: 1; height: 100%; }
+.hstat { padding: 0 16px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.hstat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.hstat-val { font-family: var(--mono); font-size: 16px; font-weight: bold; color: var(--text-bright); }
+.hstat-val.accent { color: var(--accent); }
+
+.hdr-monitors { display: flex; align-items: stretch; height: 100%; border-right: 1px solid var(--border); }
+.mon { padding: 0 16px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+.mon:last-child { border-right: none; }
+.mon-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.mon-val { font-size: 12px; font-weight: bold; font-family: var(--mono); }
+.mon-val.ok     { color: #4caf50; }
+.mon-val.lost   { color: var(--danger); }
+.mon-val.wait   { color: var(--warn); }
+
+/* ── BUTTONS ────────────────────────────────────────────────────── */
+.hdr-btns { display: flex; align-items: center; gap: 6px; padding: 0 16px; margin-left: auto; }
+.hbtn { 
+  font-family: var(--sans); font-size: 11px; padding: 4px 12px; 
+  border: 1px solid var(--border-hi); background: var(--surface2); color: var(--text); 
+  cursor: pointer; text-decoration: none; display: inline-block; text-align: center;
+}
+.hbtn:hover { background: #333333; }
+.hbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hbtn.primary:hover { background: #005a9e; border-color: #005a9e; }
+
+/* ── FOOTER ─────────────────────────────────────────────────────── */
+#footer {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 20px;
+  font-size: 11px;
+  color: var(--muted);
+}
+#footer b { color: var(--text); font-weight: normal; }
+#f-time { margin-left: auto; font-family: var(--mono); }
+
+/* ── PANELS & MAXIMIZE ──────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.panel.maximized {
+  position: fixed;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  z-index: 9999;
+  border: 1px solid var(--border-hi);
+}
+
+.phdr {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-bright);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.phdr-title { display: flex; align-items: center; gap: 8px; }
+.phdr-badge { font-size: 9px; padding: 1px 4px; background: #333; color: var(--text); border: 1px solid var(--border); font-weight: normal; }
+
+.btn-max {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 14px; padding: 0 4px; line-height: 1;
+}
+.btn-max:hover { color: var(--text-bright); }
+
+/* ── GRID PLACEMENT ─────────────────────────────────────────────── */
+#g-alt  { grid-column: 1; grid-row: 2; }
+#g-temp { grid-column: 2; grid-row: 2; }
+#g-pres { grid-column: 1; grid-row: 3; }
+#g-hum  { grid-column: 2; grid-row: 3; }
+#g-pos  { grid-column: 1 / 3; grid-row: 4; }
+#right-col { grid-column: 3; grid-row: 2 / 5; display: flex; flex-direction: column; gap: 6px; }
+
+/* ── CHARTS ─────────────────────────────────────────────────────── */
+.chart-wrap { flex: 1; padding: 8px; display: flex; flex-direction: column; min-height: 0; background: var(--bg); }
+.chart-inner { position: relative; flex: 1; width: 100%; height: 100%; }
+.chart-inner canvas { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
+/* ── POSITION PANEL ─────────────────────────────────────────────── */
+#pos-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1px;
+  background: var(--border);
+}
+.pos-cell { background: var(--surface); padding: 10px 16px; display: flex; flex-direction: column; justify-content: center; }
+.pos-cell-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.pos-cell-val { font-family: var(--mono); font-size: 20px; font-weight: bold; color: var(--text-bright); }
+.pos-cell-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ── DATA LOG ───────────────────────────────────────────────────── */
+#log-wrap { flex: 1.4; display: flex; flex-direction: column; overflow: hidden; }
+#log-scroll { flex: 1; overflow-y: auto; font-family: var(--mono); font-size: 11px; background: var(--bg); }
+#log-scroll::-webkit-scrollbar { width: 8px; }
+#log-scroll::-webkit-scrollbar-thumb { background: var(--border-hi); }
+
+.log-hdr-row, .log-row { display: grid; grid-template-columns: 66px 42px 38px 52px 50px; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+.log-hdr-row { font-size: 10px; color: var(--muted); background: var(--surface2); position: sticky; top: 0; font-family: var(--sans); }
+.log-row { color: #aaa; }
+.log-row:nth-child(even) { background: #181818; }
+
+.lc-time { color: var(--muted); }
+.lc-temp { color: var(--danger); }
+.lc-hum  { color: #4caf50; }
+.lc-pres { color: #4facde; }
+.lc-alt  { color: var(--accent); font-weight: bold; }
+
+/* ── SOS PANEL ──────────────────────────────────────────────────── */
+#sos-panel { flex: 0 0 auto; }
+#sos-panel.sos-alert { border: 1px solid var(--danger); }
+#sos-panel.sos-alert .phdr { background: var(--danger); color: #fff; border-bottom-color: var(--danger); }
+#sos-panel.sos-alert .phdr-badge { background: transparent; border-color: #fff; color: #fff; }
+#sos-panel.sos-alert .btn-max { color: #fff; }
+
+#sos-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+#sos-status { font-size: 14px; font-weight: bold; color: var(--muted); text-align: center; padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+#sos-panel.sos-alert #sos-status { color: var(--danger); }
+
+.sos-row { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 12px; }
+.sos-k { color: var(--muted); font-family: var(--sans); font-size: 11px; }
+.sos-v { font-weight: bold; color: var(--text-bright); }
+.sos-v.waiting { color: var(--warn); font-weight: normal; }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────── -->
+  <div id="header">
+    <div class="hdr-brand">
+      <div class="title">YANNY OR LORA GROUND STATION</div>
+      <div class="subtitle">Telemetry Dashboard</div>
+    </div>
+
+    <div class="hdr-stats">
+      <div class="hstat">
+        <span class="hstat-lbl">Altitude (m)</span>
+        <span class="hstat-val accent" id="h-alt">---.-</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-lbl">Temp (°C)</span>
+        <span class="hstat-val" id="h-tmp">--.-</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-lbl">Pressure (hPa)</span>
+        <span class="hstat-val" id="h-prs">----.--</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-lbl">Humidity (%)</span>
+        <span class="hstat-val" id="h-hum">--</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-lbl">Packets Rx</span>
+        <span class="hstat-val" id="h-cnt">0</span>
+      </div>
+    </div>
+
+    <div class="hdr-monitors">
+      <div class="mon">
+        <span class="mon-lbl">Mission Clock</span>
+        <span class="mon-val ok" id="t-plus">T+00:00:00</span>
+      </div>
+      <div class="mon">
+        <span class="mon-lbl">Link Status</span>
+        <span class="mon-val wait" id="link-status">STANDBY</span>
+      </div>
+    </div>
+
+    <div class="hdr-btns">
+      <button class="hbtn" onclick="clearCharts()">Clear Charts</button>
+      <button class="hbtn" onclick="doExportCharts()">Export Charts</button>
+      <button class="hbtn primary" onclick="doExport()">Export Data</button>
+    </div>
+  </div>
+
+  <!-- ── CHARTS ─────────────────────────────────────────────────── -->
+  <div class="panel" id="g-alt">
+    <div class="phdr">
+      <div class="phdr-title">Altitude <span class="phdr-badge">vs TIME</span></div>
+      <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+    </div>
+    <div class="chart-wrap"><div class="chart-inner"><canvas id="c-alt"></canvas></div></div>
+  </div>
+
+  <div class="panel" id="g-temp">
+    <div class="phdr">
+      <div class="phdr-title">Temperature <span class="phdr-badge">vs ALT</span></div>
+      <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+    </div>
+    <div class="chart-wrap"><div class="chart-inner"><canvas id="c-temp"></canvas></div></div>
+  </div>
+
+  <div class="panel" id="g-pres">
+    <div class="phdr">
+      <div class="phdr-title">Pressure <span class="phdr-badge">vs ALT</span></div>
+      <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+    </div>
+    <div class="chart-wrap"><div class="chart-inner"><canvas id="c-pres"></canvas></div></div>
+  </div>
+
+  <div class="panel" id="g-hum">
+    <div class="phdr">
+      <div class="phdr-title">Humidity <span class="phdr-badge">vs ALT</span></div>
+      <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+    </div>
+    <div class="chart-wrap"><div class="chart-inner"><canvas id="c-hum"></canvas></div></div>
+  </div>
+
+  <!-- ── POSITION PANEL ────────────────────────────────────────── -->
+  <div class="panel" id="g-pos">
+    <div class="phdr">
+      <div class="phdr-title">Cansat GPS Data <span class="phdr-badge" id="pos-badge">NO FIX</span></div>
+      <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+    </div>
+    <div id="pos-body">
+      <div class="pos-cell">
+        <span class="pos-cell-lbl">Latitude</span>
+        <span class="pos-cell-val" id="p-lat">---</span>
+        <span class="pos-cell-sub" id="p-lat-sub">Awaiting fix</span>
+      </div>
+      <div class="pos-cell">
+        <span class="pos-cell-lbl">Longitude</span>
+        <span class="pos-cell-val" id="p-lon">---</span>
+        <span class="pos-cell-sub" id="p-lon-sub">Awaiting fix</span>
+      </div>
+      <div class="pos-cell" style="align-items: center; padding: 0 24px;">
+        <a id="gmaps-link" href="#" target="_blank" class="hbtn primary" style="display: none; padding: 6px 16px;">Open in Google Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT COLUMN ──────────────────────────────────────────── -->
+  <div id="right-col">
+    <!-- Log takes up most of the space -->
+    <div class="panel" id="log-wrap">
+      <div class="phdr">
+        <div class="phdr-title">Packet Log <span class="phdr-badge" id="log-count">0 PKT</span></div>
+        <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+      </div>
+      <div id="log-scroll">
+        <div class="log-hdr-row">
+          <span>Time</span><span>Tmp</span><span>Hum</span><span>Pres</span><span>Alt</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOS sits at the bottom and auto-sizes -->
+    <div class="panel" id="sos-panel">
+      <div class="phdr" id="sos-hdr">
+        <div class="phdr-title">SOS Monitor <span class="phdr-badge" id="sos-count-badge">STATE: INACTIVE</span></div>
+        <button class="btn-max" onclick="toggleMax(this)" title="Maximize">⛶</button>
+      </div>
+      <div id="sos-body">
+        <div id="sos-status">NOMINAL</div>
+        <div class="sos-row"><span class="sos-k">Hiker Heart Rate</span><span class="sos-v" id="sos-hr">---</span></div>
+        <div class="sos-row"><span class="sos-k">Hiker Latitude</span><span class="sos-v" id="sos-lat">---</span></div>
+        <div class="sos-row"><span class="sos-k">Hiker Longitude</span><span class="sos-v" id="sos-lon">---</span></div>
+        <div class="sos-row"><span class="sos-k">Hiker Temp</span><span class="sos-v" id="sos-stemp">---</span></div>
+        <div class="sos-row"><span class="sos-k">Hiker Humidity</span><span class="sos-v" id="sos-shum">---</span></div>
+        <div class="sos-row"><span class="sos-k">CanSat Alt at SOS</span><span class="sos-v" id="sos-calt">---</span></div>
+        <div class="sos-row"><span class="sos-k">Last Rx</span><span class="sos-v" id="sos-time">--:--:--</span></div>
+        <div style="margin-top: 6px; text-align: center;">
+          <a id="sos-gmaps-link" href="#" target="_blank" class="hbtn" style="display: none; width: 100%;">Open SOS Location in Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
+  <div id="footer">
+    <span><b>PORT:</b> 115200 BAUD | WS://LOCALHOST:8765</span>
+    <span><b>MAX ALT:</b> <span id="f-maxalt">---</span> m</span>
+    <span id="f-time">00:00:00</span>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ── MAXIMIZE FEATURE ─────────────────────────────────────────────
+function toggleMax(btn) {
+  const panel = btn.closest('.panel');
+  panel.classList.toggle('maximized');
+  setTimeout(() => { ALL_CHARTS.forEach(c => c.resize()); }, 50); 
+}
+
+// ── CHART SETUP ──────────────────────────────────────────────────
+Chart.defaults.font.family  = 'Consolas, "Courier New", monospace';
+Chart.defaults.font.size    = 10;
+Chart.defaults.color        = '#858585';
+
+const GRID = { color: '#333333' };
+const TICK = { maxTicksLimit: 6, color: '#858585' };
+const TTIP = {
+  backgroundColor: '#252526',
+  borderColor:     '#555',
+  borderWidth:     1,
+  titleColor:      '#fff',
+  bodyColor:       '#ccc',
+  padding:         6
+};
+
+function scatterOpts(xtitle, ytitle) {
+  return {
+    animation: false, responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: TTIP },
+    scales: {
+      x: { grid: GRID, ticks: TICK, title: { display: true, text: xtitle, color: '#aaa' } },
+      y: { grid: GRID, ticks: TICK, title: { display: true, text: ytitle, color: '#aaa' } }
+    }
+  };
+}
+
+function lineOpts(ytitle) {
+  return {
+    animation: false, responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: TTIP },
+    scales: {
+      x: { grid: GRID, ticks: { ...TICK, maxRotation: 0 }, title: { display: true, text: 'Time', color: '#aaa' } },
+      y: { grid: GRID, ticks: TICK, title: { display: true, text: ytitle, color: '#aaa' } }
+    }
+  };
+}
+
+function mkScatter(id, color, xt, yt) {
+  return new Chart(document.getElementById(id), {
+    type: 'scatter',
+    data: { datasets: [{ data: [], borderColor: color, backgroundColor: color, pointRadius: 2, showLine: true, tension: 0, borderWidth: 1.5 }] },
+    options: scatterOpts(xt, yt)
+  });
+}
+function mkLine(id, color, yt) {
+  return new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: color, backgroundColor: color + '22', fill: true, pointRadius: 0, tension: 0, borderWidth: 1.5 }] },
+    options: lineOpts(yt)
+  });
+}
+
+// Utilitarian colors
+const cAlt  = mkLine(   'c-alt',  '#007acc', 'Altitude (m)');
+const cTemp = mkScatter('c-temp', '#d13438', 'Temp (°C)',    'Altitude (m)');
+const cPres = mkScatter('c-pres', '#4facde', 'Pres (hPa)',   'Altitude (m)');
+const cHum  = mkScatter('c-hum',  '#4caf50', 'Humidity (%)', 'Altitude (m)');
+
+const ALL_CHARTS = [cAlt, cTemp, cPres, cHum];
+const MAX_PTS    = 600;
+
+// ── STATE ────────────────────────────────────────────────────────
+let pktCount      = 0;
+let maxAltSeen    = -Infinity;
+let missionStart  = null;
+let packetTimer   = null;
+let isSosActive   = false;
+
+// ── MISSION CLOCK ────────────────────────────────────────────────
+function fmtTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const h = String(Math.floor(s / 3600)).padStart(2, '0');
+  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const sc = String(s % 60).padStart(2, '0');
+  return `T+${h}:${m}:${sc}`;
+}
+setInterval(() => {
+  if (missionStart) document.getElementById('t-plus').textContent = fmtTime(Date.now() - missionStart);
+  document.getElementById('f-time').textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+// ── LINK WATCHDOG ────────────────────────────────────────────────
+function resetLinkTimer() {
+  clearTimeout(packetTimer);
+  const el = document.getElementById('link-status');
+  el.textContent = 'LINK OK';
+  el.className   = 'mon-val ok';
+  packetTimer = setTimeout(() => {
+    el.textContent = 'SIGNAL LOST';
+    el.className   = 'mon-val lost';
+  }, 2000);
+}
+
+// ── PACKET LOG ───────────────────────────────────────────────────
+const logEl = document.getElementById('log-scroll');
+
+function addLog(e) {
+  const row = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML =
+    `<span class="lc-time">${e.time}</span>` +
+    `<span class="lc-temp">${e.temp.toFixed(1)}</span>` +
+    `<span class="lc-hum">${e.humidity.toFixed(0)}</span>` +
+    `<span class="lc-pres">${e.pressure.toFixed(1)}</span>` +
+    `<span class="lc-alt">${e.altitude.toFixed(1)}</span>`;
+  logEl.insertBefore(row, logEl.children[1]);
+  while (logEl.children.length > 301) logEl.removeChild(logEl.lastChild);
+  document.getElementById('log-count').textContent = `${pktCount} PKT`;
+}
+
+// ── TELEMETRY HANDLER ────────────────────────────────────────────
+function onTelemetry(e) {
+  pktCount++;
+  resetLinkTimer();
+
+  if (!missionStart) missionStart = Date.now();
+
+  if (e.altitude > maxAltSeen) {
+    maxAltSeen = e.altitude;
+    document.getElementById('f-maxalt').textContent = maxAltSeen.toFixed(1);
+  }
+
+  // Header stats
+  document.getElementById('h-alt').textContent = e.altitude.toFixed(1);
+  document.getElementById('h-tmp').textContent = e.temp.toFixed(1);
+  document.getElementById('h-prs').textContent = e.pressure.toFixed(2);
+  document.getElementById('h-hum').textContent = e.humidity.toFixed(0);
+  document.getElementById('h-cnt').textContent = pktCount;
+
+  // Charts
+  cAlt.data.labels.push(e.time);
+  cAlt.data.datasets[0].data.push(e.altitude);
+  cTemp.data.datasets[0].data.push({ x: e.temp,     y: e.altitude });
+  cPres.data.datasets[0].data.push({ x: e.pressure, y: e.altitude });
+  cHum.data.datasets[0].data.push({  x: e.humidity, y: e.altitude });
+
+  if (cAlt.data.labels.length > MAX_PTS) {
+    cAlt.data.labels.shift();
+    cAlt.data.datasets[0].data.shift();
+    cTemp.data.datasets[0].data.shift();
+    cPres.data.datasets[0].data.shift();
+    cHum.data.datasets[0].data.shift();
+  }
+
+  cAlt.update('none'); cTemp.update('none');
+  cPres.update('none'); cHum.update('none');
+
+  // Position panel
+  if (e.lat != null && e.lon != null) {
+    document.getElementById('pos-badge').textContent = 'GPS FIX';
+    document.getElementById('p-lat').textContent = e.lat.toFixed(5);
+    document.getElementById('p-lat-sub').textContent = 'degrees N';
+    document.getElementById('p-lon').textContent = e.lon.toFixed(5);
+    document.getElementById('p-lon-sub').textContent = 'degrees E';
+
+    const mapLink = document.getElementById('gmaps-link');
+    mapLink.style.display = 'inline-block';
+    mapLink.href = `https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lon}`;
+  }
+
+  addLog(e);
+}
+
+// ── SOS HANDLER ──────────────────────────────────────────────────
+function onSOS(s) {
+  resetLinkTimer();
+
+  if (!isSosActive) {
+    isSosActive = true;
+    document.getElementById('sos-panel').classList.add('sos-alert');
+    document.getElementById('sos-status').textContent = 'SOS ACTIVE';
+    document.getElementById('sos-count-badge').textContent = 'STATE: ACTIVE';
+
+    // Add the global red flash to the entire dashboard
+    document.body.classList.add('sos-active');
+
+    // Automatically stop the blinding red screen flash after 10 seconds
+    setTimeout(() => {
+      document.body.classList.remove('sos-active');
+    }, 10000);
+  }
+
+  const set = (id, val, unit) => {
+    const el = document.getElementById(id);
+    if (val != null && val !== 'NONE') {
+      el.textContent = (typeof val === 'number' ? val : val) + (unit || '');
+      el.className   = 'sos-v';
+    } else {
+      el.textContent = 'WAIT...';
+      el.className   = 'sos-v waiting';
+    }
+  };
+
+  // Hiker data from SOS device
+  set('sos-hr',    s.bpm,  ' BPM');
+  set('sos-lat',   s.slat  != null ? s.slat.toFixed(5)  : null, '°');
+  set('sos-lon',   s.slon  != null ? s.slon.toFixed(5)  : null, '°');
+  set('sos-stemp', s.stemp != null ? s.stemp.toFixed(1) : null, ' °C');
+  set('sos-shum',  s.shum  != null ? s.shum.toFixed(0)  : null, ' %');
+  // CanSat state at time of SOS
+  set('sos-calt',  s.calt  != null ? s.calt.toFixed(1)  : null, ' m');
+
+  document.getElementById('sos-time').textContent = s.time;
+
+  // Google Maps link uses hiker GPS if available, else CanSat GPS
+  const mapLat = s.slat != null ? s.slat : s.clat;
+  const mapLon = s.slon != null ? s.slon : s.clon;
+  if (mapLat != null && mapLon != null) {
+    const sosMapLink = document.getElementById('sos-gmaps-link');
+    sosMapLink.style.display = 'inline-block';
+    sosMapLink.href = `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLon}`;
+  }
+}
+
+// ── CLEAR CHARTS ─────────────────────────────────────────────────
+function clearCharts() {
+  cAlt.data.labels = [];
+  [cAlt, cTemp, cPres, cHum].forEach(c => {
+    c.data.datasets[0].data = [];
+    c.update('none');
+  });
+  pktCount = 0;
+  document.getElementById('h-cnt').textContent = '0';
+  document.getElementById('log-count').textContent = '0 PKT';
+  while (logEl.children.length > 1) logEl.removeChild(logEl.lastChild);
+}
+
+// ── EXPORT CHARTS AS PNG ─────────────────────────────────────────
+function doExportCharts() {
+  const COLS    = 2; 
+  const W       = 600;
+  const H       = 400;
+  const PAD     = 10;
+  const HDR     = 40;
+  const canvases = ALL_CHARTS.map(c => c.canvas);
+  const rows    = Math.ceil(canvases.length / COLS);
+  const totalW  = COLS * W + (COLS + 1) * PAD;
+  const totalH  = HDR + rows * H + (rows + 1) * PAD;
+
+  const out = document.createElement('canvas');
+  out.width  = totalW;
+  out.height = totalH;
+  const ctx  = out.getContext('2d');
+
+  ctx.fillStyle = '#1e1e1e';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  ctx.fillStyle = '#252526';
+  ctx.fillRect(0, 0, totalW, HDR);
+  ctx.fillStyle = '#cccccc';
+  ctx.font      = 'bold 16px "Segoe UI", sans-serif';
+  ctx.fillText('Yanny or Lora Chart Export', PAD, 26);
+
+  const titles = ['Altitude vs Time', 'Temp vs Altitude', 'Pressure vs Altitude', 'Humidity vs Altitude'];
+
+  canvases.forEach((src, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const x   = PAD + col * (W + PAD);
+    const y   = HDR + PAD + row * (H + PAD);
+
+    ctx.fillStyle = '#121212';
+    ctx.fillRect(x, y, W, H);
+    ctx.strokeStyle = '#3e3e42';
+    ctx.lineWidth   = 1;
+    ctx.strokeRect(x, y, W, H);
+
+    ctx.fillStyle = '#858585';
+    ctx.font = 'bold 12px "Segoe UI", sans-serif';
+    ctx.fillText(titles[i], x + 10, y + 20);
+
+    ctx.drawImage(src, x + 5, y + 25, W - 10, H - 30);
+  });
+
+  const link   = document.createElement('a');
+  link.download = `charts_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+  link.href     = out.toDataURL('image/png');
+  link.click();
+}
+
+// ── EXPORT DATA (xlsx via server) ────────────────────────────────
+function doExport() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'export' }));
+  } else {
+    alert('Cannot export: not connected to telemetry server.');
+  }
+}
+
+// ── WEBSOCKET ────────────────────────────────────────────────────
+let ws;
+function connect() {
+  ws = new WebSocket('ws://localhost:8765');
+  ws.onopen = () => {
+    document.getElementById('link-status').textContent = 'AWAITING DATA';
+    document.getElementById('link-status').className   = 'mon-val wait';
+  };
+  ws.onclose = () => {
+    document.getElementById('link-status').textContent = 'SERVER OFFLINE';
+    document.getElementById('link-status').className   = 'mon-val lost';
+    clearTimeout(packetTimer);
+    setTimeout(connect, 2000);
+  };
+  ws.onmessage = ev => {
+    const d = JSON.parse(ev.data);
+    if      (d.type === 'telemetry')   onTelemetry(d);
+    else if (d.type === 'sos_event')   onSOS(d);
+    else if (d.type === 'export_done') alert('Exported to:\n' + d.path);
+  };
+}
+connect();
+
+window.addEventListener('resize', () => ALL_CHARTS.forEach(c => c.resize()));
+</script>
+</body>
+</html>
