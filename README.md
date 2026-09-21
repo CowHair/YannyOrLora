@@ -62,8 +62,8 @@ The onboard radio logic (LoRa, via RadioLib) runs on a strict 1 second frame, sp
 Two separate LoRa sync words to keep the two links from colliding on the same channel: one for the CanSat ↔ SOS device link, one for the CanSat → ground link. Cached SOS data expires automatically if no new packet arrives within 10 seconds, so the ground station is never shown stale distress information. ACKs to the SOS device are rate-limited so the CanSat doesn't spend its listen/transmit budget re-acknowledging every frame once contact is established.
 
 ## Hardware/Mechanical Design
-- Emergency Device Components: BME280, Button, Buzzer, V1 T-Beam ESP32, OLED screen, MAX30102, Toogle Switch
-- CanSat Components: BME280, V1 T-Beam ESP32, 
+- Emergency Device Components: BME280, Button, Buzzer, V1 T-Beam ESP32, OLED screen, MAX30102, Toogle Switch, 950kHz Antenna
+- CanSat Components: BME280, V1 T-Beam ESP32, LED, Power Switch, 950kHz Antenna
 - Designed with FreeCad by Asa Liu and Bogdan Shkromiuk 
 <table>
     <tr>
