@@ -1,7 +1,7 @@
 # CanSat Competition 2026 Team Yanny or LoRa 🏆 | 1st in Canada 🇨🇦 and represented Canada at the European Space Agency
 *From Eric Hamber Secondary School in Vancouver, BC, Canada*
 
-![Alt Text](media/TeamMainPhoto.jpg)
+![Group photo of team](media/TeamMainPhoto.jpg)
 
 ## Team Members
 
@@ -75,3 +75,6 @@ Two separate LoRa sync words to keep the two links from colliding on the same ch
 
 ## Software
 
+## Cost Breakdown
+
+![Table of budget and cost breakdown](media/CostBreakdown.png)
