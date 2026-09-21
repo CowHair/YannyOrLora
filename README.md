@@ -49,6 +49,7 @@ The CanSat is launched to around 1km in altitude and descends using a parachute,
 The CanSat acts as the relay between the emergency device and ground station. It listens for the SOS device's signal, caches the most recent emerency data it hears, and piggybacks those fields onto its normal telemetry stream to the ground. The ground station sees both the CanSat's own descent data and the hiker's status in a single feed, without needing separate ground hardware for each link.
 
 ## Radio System (Time Sliced Relay Architecture)
+![Communication Logic Image](media/Communication_Logic.png)
 
 The onboard radio logic (LoRa, via RadioLib) runs on a strict 1 second frame, split into three phases:
 
@@ -60,26 +61,16 @@ The onboard radio logic (LoRa, via RadioLib) runs on a strict 1 second frame, sp
 
 Two separate LoRa sync words to keep the two links from colliding on the same channel: one for the CanSat ↔ SOS device link, one for the CanSat → ground link. Cached SOS data expires automatically if no new packet arrives within 10 seconds, so the ground station is never shown stale distress information. ACKs to the SOS device are rate-limited so the CanSat doesn't spend its listen/transmit budget re-acknowledging every frame once contact is established.
 
+## Hardware/Mechanical Design
 - Emergency Device Components: BME280, Button, Buzzer, V1 T-Beam ESP32, OLED screen, MAX30102, Toogle Switch
 - CanSat Components: BME280, V1 T-Beam ESP32, 
 - Designed with FreeCad by Asa Liu and Bogdan Shkromiuk 
-## Hardware/Mechanical Design
 <table>
     <tr>
         <td><img src="media/Radio_main.jpg" width="500"></td>
         <td><img src="media/Radio_CanSat.jpg" width="500"></td>
     </tr> 
 </table>
-
-<<<<<<< HEAD
-=======
-- Include 
-- Designed in FreeCad and 3D printed
-  
-## Firmware
-
->>>>>>> 8f31e21d2d3269a0736c6a903bd727990e645b9f
-## Software
 
 ## Cost Breakdown
 
