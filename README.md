@@ -60,9 +60,12 @@ The onboard radio logic (LoRa, via RadioLib) runs on a strict 1 second frame, sp
 Two separate LoRa sync words keep the two links from colliding on the same channel: one for the CanSat↔SOS-device link, one for the CanSat→ground link. Cached SOS data expires automatically if no new packet arrives within 10 seconds, so the ground station is never shown stale distress information. ACKs to the SOS device are rate-limited so the CanSat doesn't spend its listen/transmit budget re-acknowledging every frame once contact is established.
 
 ## Hardware/Mechanical Design
-![Alt Text](media/Body.png) ![Alt Text](media/Body_2.png)
-
-
+<table>
+    <tr>
+        <td><img src="media/Body.png.png" width="40%"></td>
+        <td><img src="media/Body_2.png.png" width="40%"></td>
+    </tr>
+</table>
 
 ## Firmware
 
